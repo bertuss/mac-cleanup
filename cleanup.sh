@@ -10,12 +10,6 @@ bytesToHuman() {
     echo "$b$d ${S[$s]} of space was cleaned up :3"
 }
 
-# Ask for the administrator password upfront
-if [ "$EUID" -ne 0  ]; then
-	echo "Please run as root"
-	exit
-fi
-
 oldAvailable=$(df / | tail -1 | awk '{print $4}')
 
 echo 'Empty the Trash on all mounted volumes and the main HDD...'
@@ -42,6 +36,9 @@ echo 'Cleanup XCode Derived Data and Archives...'
 rm -rfv ~/Library/Developer/Xcode/DerivedData/* &>/dev/null
 rm -rfv ~/Library/Developer/Xcode/Archives/* &>/dev/null
 
+echo 'Cleanup Spotify Cache..'
+rm -rfv ~/Library/Caches/com.spotify.client/Data/* &>/dev/null
+
 echo 'Cleanup Homebrew Cache...'
 brew cleanup --force -s &>/dev/null
 brew cask cleanup &>/dev/null
@@ -51,10 +48,14 @@ brew tap --repair &>/dev/null
 echo 'Cleanup any old versions of gems'
 gem cleanup &>/dev/null
 
+echo 'Cleanup Docker images...'
+docker system prune -af
+docker volume rm $(docker volume ls -f dangling=true -q)
+
 echo 'Purge inactive memory...'
 sudo purge
 
-clear && echo 'Success!'
+echo 'Success!'
 
 newAvailable=$(df / | tail -1 | awk '{print $4}')
 count=$((newAvailable-oldAvailable))
