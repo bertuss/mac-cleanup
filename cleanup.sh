@@ -49,8 +49,8 @@ echo 'Cleanup any old versions of gems'
 gem cleanup &>/dev/null
 
 echo 'Cleanup Docker images...'
-docker system prune -af
-docker volume rm $(docker volume ls -f dangling=true -q)
+docker system prune -af &>/dev/null
+docker volume rm $(docker volume ls -f dangling=true -q) &>/dev/null
 
 echo 'Purge inactive memory...'
 sudo purge
